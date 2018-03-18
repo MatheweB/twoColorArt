@@ -37,21 +37,22 @@ def resizeImage (img, xyDims):
         for instance in instanceType:
             instance.image = instance.image.resize(size, Image.ANTIALIAS)
             
-def numPyIfy(img):
+def numPyIfy(img): #creates a 2D array of pixels
     img = np.asarray(img, dtype=np.float32)
+    return img
             
 def makeImage(imageName):
-    img = Image.open(imageName).convert('BW') #image must be in same folder
+    img = Image.open(imageName).convert('L') #image must be in same folder
     storedImg = img.copy()
     img.close()
-    storedImg = numPyIfy(storedImage)
-    print(storedImg)
+    storedImg = numPyIfy(storedImg)
     return storedImg
 
 def main():
     img = makeImage("monaLisa.jpg")
     grid = Grid()
-    grid.photo = storedImg
+    grid.photo = img
+    print(grid.photo)
     grid.squares = makeSquares(grid.photo)
     
 main()
