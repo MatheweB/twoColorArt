@@ -1,40 +1,42 @@
 from PIL import Image
 import numpy as np
 import math
+from scipy.misc import toimage #IMAGE PLOTTER
 
-tileSize = 13 #defines the square size of a given tile
+tileSize = 30 #defines the square size of a given tile
 
 class Square:
-    def __init__(self):
-        self.c = None #0 if White, 1 if Black. Determines direction of slider
-        self.avgColor = None #the average pixel color of the square
+    def __init__(self, c, avgColor, x, y):
+        self.c = c #0 if White, 1 if Black. Determines direction of slider
+        self.avgColor = avgColor #the average pixel color of the square
         
         #Keep track of the square dimensions & location on the Map
         #
         #top left
-        self.x = None
-        self.y = None
+        self.x = x
+        self.y = x
         #
-        #top right
-        self.xEnd = None
-        self.yEnd = None
+        #bottom right
+        self.xEnd = x + tileSize
+        self.yEnd = y + tileSize
         
         #Neighbors (to know where the slider goes)
         self.N = None
         self.E = None
         self.S = None
         self.W = None
+
+    def getNeighbors(self, squares, gridIndex):
+        return None
         
 class Grid:
     def __init__(self):
         self.squares = [] #2D array of all squares on the grid in l-r u-d order
-        self.photo = None
-        self.dimensions = [] #x,y dimensions of the photo
-        
-    def getDimensions(self):
-        self.dimensions.append(len(self.photo[0])) #x
-        self.dimensions.append(len(self.photo)) #y
-        print(self.dimensions)
+        self.photo = None #2D array also
+        self.pixelPhoto = [] #Lower-res 2D array
+
+    def showPixelPhoto(self):
+        toimage(self.pixelPhoto).show()
 
 def makeDimensionsWork(img):
     x = img.size[0]
@@ -51,20 +53,24 @@ def makeDimensionsWork(img):
 
 def makeSquares(grid):
     squareNum = 0
-    #print(grid.dimensions[1]//tileSize, grid.dimensions[0]//tileSize)
+    totalSquares = 0
+    
     for y in range(0, len(grid.photo)//tileSize):
         grid.squares.append([]) #makes a new level in 2D array
+        grid.pixelPhoto.append([])
         for x in range(0, len(grid.photo[0])//tileSize):
             for a in range(0,tileSize):
                 for b in range(0,tileSize):
                     squareNum += grid.photo[y*tileSize + a][x*tileSize + b]
-                    
-            grid.squares[y].append(int(squareNum//(tileSize*tileSize)))
+            
+            totalSquares += 1
+            newSquare = Square(totalSquares%2, int(squareNum//(tileSize*tileSize)), x*tileSize, y*tileSize)
+            grid.squares[y].append(newSquare)
+            grid.pixelPhoto[y].append(int(squareNum//(tileSize*tileSize)))
             squareNum = 0
-    #print(grid.squares)
             
 def numPyIfy(img): #creates a 2D array of pixels
-    img = np.asarray(img, dtype=np.float32)
+    img = np.asarray(img)
     return img
             
 def makeImage(imageName):
@@ -80,9 +86,8 @@ def makeImage(imageName):
 def main():
     grid = Grid()
     grid.photo = makeImage("monaLisa.jpg")
-    print(len(grid.photo), len(grid.photo[0]))
     makeSquares(grid)
-    print(grid.squares)
+    grid.showPixelPhoto()
     
     
 main()
